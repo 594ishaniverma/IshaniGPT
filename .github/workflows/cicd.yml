@@ -11,7 +11,11 @@ permissions:
 
 jobs:
   ci:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: test
+      GOOGLE_API_KEY: ci-placeholder
+      TAVILY_API_KEY: ci-placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
