@@ -10,7 +10,8 @@ permissions:
   packages: write
 
 jobs:
-  ci:
+  continuous-integration:
+    name: Continuous Integration
     runs-on: self-hosted
     env:
       ENVIRONMENT: test
@@ -37,9 +38,10 @@ jobs:
       - run: flutter build web --release
         working-directory: frontend
 
-  publish-api-image:
+  continuous-deployment:
+    name: Continuous Deployment
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: ci
+    needs: continuous-integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
