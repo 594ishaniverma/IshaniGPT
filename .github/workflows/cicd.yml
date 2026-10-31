@@ -78,6 +78,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
+      - name: Free runner disk space
+        shell: bash
+        run: |
+          df -h /
+          docker system prune --all --force
+          docker builder prune --all --force
+          sudo rm -rf /tmp/awscli-install /tmp/awscliv2.zip
+          sudo apt-get clean
+          df -h /
       - name: Install AWS CLI
         shell: bash
         run: |
