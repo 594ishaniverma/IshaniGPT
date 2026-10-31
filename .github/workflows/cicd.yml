@@ -84,7 +84,9 @@ jobs:
           docker volume prune --force || true
           docker system prune --all --force --volumes || true
           sudo apt-get clean || true
+          sudo rm -rf /var/cache/apt/archives/*.deb /var/lib/apt/lists/*
           sudo journalctl --vacuum-size=20M >/dev/null 2>&1 || true
+          sudo find /var/lib/docker/containers -name '*-json.log' -type f -exec truncate -s 0 {} + 2>/dev/null || true
           rm -rf /tmp/awscli-install /tmp/awscliv2.zip "$HOME"/.cache/pip
           df -h /
           AVAILABLE_GB="$(df -BG / | awk 'NR == 2 { gsub("G", "", $4); print $4 }')"
