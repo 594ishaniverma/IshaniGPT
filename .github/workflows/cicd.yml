@@ -120,8 +120,13 @@ jobs:
             docker login --username AWS --password-stdin "$REGISTRY"
 
           docker build -t "${IMAGE_URI}:${GITHUB_SHA}" -t "${IMAGE_URI}:latest" .
-          docker push "${IMAGE_URI}:${GITHUB_SHA}"
-          docker push "${IMAGE_URI}:latest"
+          docker push "${IMAGE_URI}:${GITHUB_SHA}" || docker push "${IMAGE_URI}:${GITHUB_SHA}"
+          docker push "${IMAGE_URI}:latest" || docker push "${IMAGE_URI}:latest"
+
+          aws ecr batch-get-image \
+            --repository-name "$REPOSITORY" \
+            --region "$AWS_DEFAULT_REGION" \
+            --image-ids imageTag=latest >/dev/null
       - name: Deploy API with Docker Compose on the AWS runner
         shell: bash
         run: |
@@ -143,3 +148,5 @@ jobs:
 
           docker compose pull api
           docker compose up -d --no-build postgres api
+          docker compose ps
+          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8000/health
