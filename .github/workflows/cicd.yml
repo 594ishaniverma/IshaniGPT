@@ -66,12 +66,12 @@ jobs:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION || secrets.AWS_REGION || secrets.default_region }}
       AWS_ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY || secrets.ECR_REPOSITORY || secrets.AWS_REPO || secrets.repo }}
       ENVIRONMENT: production
-      POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'ishani' }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB || 'ishani_gpt' }}
-      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || '' }}
-      FRONTEND_ORIGINS: ${{ secrets.FRONTEND_ORIGINS }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER || secrets.postgres_user || 'ishani' }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD || secrets.postgres_password }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB || secrets.postgres_db || 'ishani_gpt' }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY || secrets.google_api_key }}
+      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.tavily_api_key || '' }}
+      FRONTEND_ORIGINS: ${{ secrets.FRONTEND_ORIGINS || secrets.frontend_origins }}
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
