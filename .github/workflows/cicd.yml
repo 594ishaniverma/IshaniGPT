@@ -171,7 +171,14 @@ jobs:
           REPOSITORY="${REPOSITORY,,}"
           export API_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${REPOSITORY}:latest"
 
-          docker compose pull api
-          docker compose up -d --no-build postgres api
+          df -h /
+          if ! docker compose pull api; then
+            echo "::error::Docker image pull failed; showing disk usage and removing unused images"
+            df -h /
+            docker system prune --all --force
+            docker compose pull api
+          fi
+          docker compose up -d --pull never --no-build postgres api
           docker compose ps
-          curl --fail --retry 12 --retry-delay 5 http://127.0.0.1:8000/health
+          docker compose logs --tail=100 api || true
+          curl --fail --retry 20 --retry-delay 5 --retry-all-errors http://127.0.0.1:8000/health
