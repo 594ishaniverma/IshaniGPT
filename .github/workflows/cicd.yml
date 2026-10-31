@@ -75,10 +75,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      - name: Install AWS CLI
+        shell: bash
+        run: |
+          python -m pip install --user awscli
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Build and publish API image to Amazon ECR
         shell: bash
         run: |
           set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
 
           test -n "$AWS_ACCESS_KEY_ID" || { echo "::error::AWS_ACCESS_KEY_ID or aws_access_key secret is missing"; exit 1; }
           test -n "$AWS_SECRET_ACCESS_KEY" || { echo "::error::AWS_SECRET_ACCESS_KEY or aws_secret_key secret is missing"; exit 1; }
@@ -97,6 +103,10 @@ jobs:
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           IMAGE_URI="${REGISTRY}/${REPOSITORY}"
 
+          if ! aws ecr describe-repositories --repository-names "$REPOSITORY" --region "$AWS_DEFAULT_REGION" >/dev/null 2>&1; then
+            aws ecr create-repository --repository-name "$REPOSITORY" --region "$AWS_DEFAULT_REGION"
+          fi
+
           aws ecr get-login-password --region "$AWS_DEFAULT_REGION" |
             docker login --username AWS --password-stdin "$REGISTRY"
 
@@ -107,6 +117,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
 
           test -n "$POSTGRES_PASSWORD" || { echo "::error::POSTGRES_PASSWORD secret is missing"; exit 1; }
           test -n "$GOOGLE_API_KEY" || { echo "::error::GOOGLE_API_KEY secret is missing"; exit 1; }
