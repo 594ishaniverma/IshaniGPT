@@ -148,7 +148,17 @@ jobs:
           set -euo pipefail
           export PATH="$HOME/.local/bin:$PATH"
 
-          test -n "$POSTGRES_PASSWORD" || { echo "::error::POSTGRES_PASSWORD secret is missing"; exit 1; }
+          if [ -z "$POSTGRES_PASSWORD" ]; then
+            mkdir -p "$HOME/.ishanigpt"
+            PASSWORD_FILE="$HOME/.ishanigpt/postgres_password"
+            if [ ! -s "$PASSWORD_FILE" ]; then
+              openssl rand -base64 32 | tr -d '\n' > "$PASSWORD_FILE"
+              chmod 600 "$PASSWORD_FILE"
+            fi
+            POSTGRES_PASSWORD="$(cat "$PASSWORD_FILE")"
+            export POSTGRES_PASSWORD
+            echo "::warning::POSTGRES_PASSWORD secret is not configured; using a password persisted on the runner"
+          fi
           test -n "$GOOGLE_API_KEY" || { echo "::error::GOOGLE_API_KEY secret is missing"; exit 1; }
           test -n "$FRONTEND_ORIGINS" || { echo "::error::FRONTEND_ORIGINS secret is missing"; exit 1; }
 
