@@ -122,8 +122,13 @@ jobs:
             docker login --username AWS --password-stdin "$REGISTRY"
 
           docker build -t "${IMAGE_URI}:${GITHUB_SHA}" -t "${IMAGE_URI}:latest" .
-          docker push "${IMAGE_URI}:${GITHUB_SHA}" || docker push "${IMAGE_URI}:${GITHUB_SHA}"
-          docker push "${IMAGE_URI}:latest" || docker push "${IMAGE_URI}:latest"
+          echo "Pushing ${IMAGE_URI}:${GITHUB_SHA}"
+          if ! docker push "${IMAGE_URI}:${GITHUB_SHA}"; then
+            echo "::error::ECR push denied. The AWS identity needs ecr:BatchCheckLayerAvailability, ecr:CompleteLayerUpload, ecr:GetAuthorizationToken, ecr:InitiateLayerUpload, ecr:PutImage and ecr:UploadLayerPart."
+            exit 1
+          fi
+          echo "Pushing ${IMAGE_URI}:latest"
+          docker push "${IMAGE_URI}:latest"
 
           aws ecr batch-get-image \
             --repository-name "$REPOSITORY" \
