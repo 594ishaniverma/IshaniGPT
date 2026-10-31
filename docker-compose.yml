@@ -16,6 +16,7 @@ services:
 
   api:
     build: .
+    image: ${API_IMAGE:-ishanigpt-api:local}
     restart: unless-stopped
     ports: ["8000:8000"]
     environment:

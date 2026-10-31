@@ -61,6 +61,20 @@ docker compose up --build -d
 curl.exe http://127.0.0.1:8000/ready
 ```
 
+For deployment on an AWS EC2 self-hosted runner, configure the repository
+Secrets below. The `main` workflow builds the API image, pushes it to ECR, then
+pulls and starts it with Docker Compose on the runner:
+
+```text
+AWS_ACCESS_KEY_ID (or aws_access_key)
+AWS_SECRET_ACCESS_KEY (or aws_secret_key)
+AWS_DEFAULT_REGION (or AWS_REGION / default_region)
+AWS_ECR_REPOSITORY (repository name, or AWS_REPO / repo)
+POSTGRES_PASSWORD
+GOOGLE_API_KEY
+FRONTEND_ORIGINS
+```
+
 The Compose deployment stores PostgreSQL data, uploaded files, Chroma indexes,
 and LangGraph checkpoints in named volumes. For a custom deployment, configure
 `DATABASE_URL`, `SQLITE_DATABASE_PATH`, `CHECKPOINT_SQLITE_PATH`,
