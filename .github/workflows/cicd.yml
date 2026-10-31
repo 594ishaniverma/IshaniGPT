@@ -121,14 +121,13 @@ jobs:
           aws ecr get-login-password --region "$AWS_DEFAULT_REGION" |
             docker login --username AWS --password-stdin "$REGISTRY"
 
-          docker build -t "${IMAGE_URI}:${GITHUB_SHA}" -t "${IMAGE_URI}:latest" .
-          echo "Pushing ${IMAGE_URI}:${GITHUB_SHA}"
-          if ! docker push "${IMAGE_URI}:${GITHUB_SHA}"; then
-            echo "::error::ECR push denied. The AWS identity needs ecr:BatchCheckLayerAvailability, ecr:CompleteLayerUpload, ecr:GetAuthorizationToken, ecr:InitiateLayerUpload, ecr:PutImage and ecr:UploadLayerPart."
-            exit 1
-          fi
-          echo "Pushing ${IMAGE_URI}:latest"
-          docker push "${IMAGE_URI}:latest"
+          echo "Building and pushing ${IMAGE_URI}:${GITHUB_SHA}"
+          docker buildx build \
+            --push \
+            --provenance=false \
+            --tag "${IMAGE_URI}:${GITHUB_SHA}" \
+            --tag "${IMAGE_URI}:latest" \
+            .
 
           aws ecr batch-get-image \
             --repository-name "$REPOSITORY" \
