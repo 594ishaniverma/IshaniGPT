@@ -80,14 +80,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -n "$AWS_ACCESS_KEY_ID"
-          test -n "$AWS_SECRET_ACCESS_KEY"
-          test -n "$AWS_DEFAULT_REGION"
-          test -n "$AWS_ECR_REPOSITORY"
+          test -n "$AWS_ACCESS_KEY_ID" || { echo "::error::AWS_ACCESS_KEY_ID or aws_access_key secret is missing"; exit 1; }
+          test -n "$AWS_SECRET_ACCESS_KEY" || { echo "::error::AWS_SECRET_ACCESS_KEY or aws_secret_key secret is missing"; exit 1; }
+          test -n "$AWS_DEFAULT_REGION" || { echo "::error::AWS_DEFAULT_REGION or default_region secret is missing"; exit 1; }
+
+          if [ -n "$AWS_ECR_REPOSITORY" ]; then
+            REPOSITORY="${AWS_ECR_REPOSITORY##*/}"
+          else
+            REPOSITORY="${GITHUB_REPOSITORY##*/}"
+          fi
+          REPOSITORY="${REPOSITORY,,}"
+          test -n "$REPOSITORY"
 
           aws sts get-caller-identity >/dev/null
           ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-          REPOSITORY="${AWS_ECR_REPOSITORY##*/}"
           REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           IMAGE_URI="${REGISTRY}/${REPOSITORY}"
 
@@ -102,12 +108,17 @@ jobs:
         run: |
           set -euo pipefail
 
-          test -n "$POSTGRES_PASSWORD"
-          test -n "$GOOGLE_API_KEY"
-          test -n "$FRONTEND_ORIGINS"
+          test -n "$POSTGRES_PASSWORD" || { echo "::error::POSTGRES_PASSWORD secret is missing"; exit 1; }
+          test -n "$GOOGLE_API_KEY" || { echo "::error::GOOGLE_API_KEY secret is missing"; exit 1; }
+          test -n "$FRONTEND_ORIGINS" || { echo "::error::FRONTEND_ORIGINS secret is missing"; exit 1; }
 
           ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
-          REPOSITORY="${AWS_ECR_REPOSITORY##*/}"
+          if [ -n "$AWS_ECR_REPOSITORY" ]; then
+            REPOSITORY="${AWS_ECR_REPOSITORY##*/}"
+          else
+            REPOSITORY="${GITHUB_REPOSITORY##*/}"
+          fi
+          REPOSITORY="${REPOSITORY,,}"
           export API_IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${REPOSITORY}:latest"
 
           docker compose pull api
