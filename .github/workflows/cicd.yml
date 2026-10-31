@@ -73,6 +73,20 @@ jobs:
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY || secrets.tavily_api_key || '' }}
       FRONTEND_ORIGINS: ${{ secrets.FRONTEND_ORIGINS || secrets.frontend_origins }}
     steps:
+      - name: Free runner disk space before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          df -h /
+          docker container prune --force || true
+          docker image prune --all --force || true
+          docker builder prune --all --force || true
+          docker volume prune --force || true
+          docker system prune --all --force --volumes || true
+          sudo apt-get clean || true
+          sudo journalctl --vacuum-size=20M >/dev/null 2>&1 || true
+          rm -rf /tmp/awscli-install /tmp/awscliv2.zip "$HOME"/.cache/pip
+          df -h /
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: actions/setup-python@v5
@@ -81,11 +95,15 @@ jobs:
       - name: Free runner disk space
         shell: bash
         run: |
+          set -euo pipefail
           df -h /
-          docker system prune --all --force
-          docker builder prune --all --force
+          docker container prune --force || true
+          docker image prune --all --force || true
+          docker builder prune --all --force || true
+          docker volume prune --force || true
+          docker system prune --all --force --volumes || true
           sudo rm -rf /tmp/awscli-install /tmp/awscliv2.zip
-          sudo apt-get clean
+          sudo apt-get clean || true
           df -h /
       - name: Install AWS CLI
         shell: bash
