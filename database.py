@@ -13,6 +13,15 @@ if not DATABASE_URL:
     sqlite_path = Path(os.getenv("SQLITE_DATABASE_PATH", "data/chatbot_memory.db"))
     sqlite_path.parent.mkdir(parents=True, exist_ok=True)
     DATABASE_URL = f"sqlite:///{sqlite_path.as_posix().lstrip('/')}"
+import urllib.parse
+if "://" in DATABASE_URL and "@" in DATABASE_URL:
+    prefix, _, rest = DATABASE_URL.partition("://")
+    if rest.count("@") > 1:
+        userpass, _, hostdb = rest.rpartition("@")
+        if ":" in userpass:
+            user, _, pwd = userpass.partition(":")
+            DATABASE_URL = f"{prefix}://{user}:{urllib.parse.quote(pwd, safe='')}@{hostdb}"
+
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
 elif DATABASE_URL.startswith("postgresql://"):

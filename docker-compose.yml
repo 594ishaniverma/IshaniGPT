@@ -20,9 +20,10 @@ services:
     restart: unless-stopped
     ports: ["8000:8000"]
     environment:
-      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DATABASE_URL: postgresql://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@postgres:5432/${POSTGRES_DB:-ishani_gpt}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:?GOOGLE_API_KEY is required}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash}
       TAVILY_API_KEY: ${TAVILY_API_KEY:-}
       FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:?FRONTEND_ORIGINS is required}
       CHECKPOINT_SQLITE_PATH: /app/checkpoints/langgraph_checkpoints.sqlite

@@ -15,7 +15,8 @@ from uuid import uuid4
 
 from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import text
@@ -531,3 +532,10 @@ def stream_message(thread_id: str, request: SendMessageRequest, user: User = Dep
             logger.exception("Streaming assistant response failed")
             yield "data: {\"error\": \"IshaniGPT could not generate a response.\"}\n\n"
     return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ── Serve the web frontend (must come AFTER all API routes) ──────────────────
+_frontend_dir = Path("web_frontend")
+if _frontend_dir.exists():
+    # Serve individual static assets (style.css, app.js, etc.)
+    app.mount("/", StaticFiles(directory=str(_frontend_dir), html=True), name="frontend")

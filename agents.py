@@ -20,10 +20,12 @@ from tools import tools
 CHECKPOINT_SQLITE_PATH = Path(os.getenv("CHECKPOINT_SQLITE_PATH", "data/langgraph_checkpoints.sqlite"))
 CHECKPOINT_SQLITE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-#update default and allowed model to use gemini 2.5
-DEFAULT_MODEL=os.getenv("GEMINI_MODEL","gemini-2.5-flash")
+#update default and allowed model to use gemini 3.5
+DEFAULT_MODEL=os.getenv("GEMINI_MODEL","gemini-3.5-flash")
 
 ALLOWED_MODELS={
+    "gemini-3.5-flash",
+    "gemini-3.8-flash",
     "gemini-2.5-flash",
     "gemini-2.5-pro",
     "gemini-2.5-flash-lite",
